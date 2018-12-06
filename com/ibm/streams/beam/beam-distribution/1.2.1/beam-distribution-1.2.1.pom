@@ -1,0 +1,172 @@
+<!-- begin_generated_IBM_copyright_prolog                             -->
+<!--                                                                  -->
+<!-- This is an automatically generated copyright prolog.             -->
+<!-- After initializing,  DO NOT MODIFY OR MOVE                       -->
+<!-- **************************************************************** -->
+<!-- Licensed Materials - Property of IBM                             -->
+<!-- 5724-Y95                                                         -->
+<!-- (C) Copyright IBM Corp.  2017, 2018    All Rights Reserved.      -->
+<!-- US Government Users Restricted Rights - Use, duplication or      -->
+<!-- disclosure restricted by GSA ADP Schedule Contract with          -->
+<!-- IBM Corp.                                                        -->
+<!--                                                                  -->
+<!-- end_generated_IBM_copyright_prolog                               -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.ibm.streams.beam</groupId>
+        <artifactId>beam-parent</artifactId>
+        <version>1.2.1</version>
+    </parent>
+    <artifactId>beam-distribution</artifactId>
+    <packaging>pom</packaging>
+
+    <name>IBM Streams Beam Distribution</name>
+
+    <profiles>
+        <profile>
+            <id>deploy-nexus</id>
+            <activation>
+                <property>
+                    <name>!skipDeployNexus</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <executions>
+                            <execution>
+                                <id>Deploy-Streams-Nexus</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${project.basedir}/scripts/prepare-beam-for-streams.sh</executable>
+                                    <arguments>
+                                        <argument>${streams.version}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <executions>
+                    <execution>
+                        <id>snapshot-product-file</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${project.basedir}/scripts/make.product.sh</executable>
+                            <arguments>
+                                <argument>${project.version}</argument>
+                                <argument>${beam.version}</argument>
+                                <argument>snapshot</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>release-product-file</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${project.basedir}/scripts/make.product.sh</executable>
+                            <arguments>
+                                <argument>${project.version}</argument>
+                                <argument>${beam.version}</argument>
+                                <argument>release</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>assemble-tarball</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/toolkit-tarball.xml</descriptor>
+                            </descriptors>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <tarLongFileMode>gnu</tarLongFileMode>
+                            <finalName>${project.groupId}-${project.version}</finalName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/com.ibm.streams.beam-${project.version}.tar.gz</file>
+                                    <type>tar.gz</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <dependencies>
+        <!-- Don't need to specify versions: inherited from parent, for uniformity! -->
+
+        <!-- Inter-module Dependencies -->
+        <dependency>
+            <groupId>com.ibm.streams.beam</groupId>
+            <artifactId>beam-toolkit</artifactId>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.streams.beam</groupId>
+            <artifactId>beam-examples</artifactId>
+            <type>pom</type>
+        </dependency>
+
+
+        <!-- IBM Streams Dependencies -->
+
+
+        <!-- Beam Dependencies -->
+        <!-- Explicitely trying to avoid Beam dependencies here, especially non-test -->
+
+        <!-- Third-party Dependencies -->
+
+
+    </dependencies>
+</project>
